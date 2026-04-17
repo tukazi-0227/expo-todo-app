@@ -27,10 +27,63 @@ jobs:
 
       - run: npm ci
 
-      - uses: expo/expo-github-action/preview@v8
-        id: preview
+      - name: Publish EAS Update
+        id: update
+        run: |
+          OUTPUT=$(eas update \
+            --branch "pr-${{ github.event.pull_request.number }}" \
+            --message "PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}" \
+            --non-interactive \
+            --json)
+          echo "json<<EOF" >> $GITHUB_OUTPUT
+          echo "$OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post preview comment
+        uses: actions/github-script@v7
+        env:
+          UPDATE_JSON: ${{ steps.update.outputs.json }}
         with:
-          command: eas update --branch pr-${{ github.event.pull_request.number }} --message "PR #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}" --non-interactive
-          comment: true
-          comment-id: expo-preview-${{ github.event.pull_request.number }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const updates = JSON.parse(process.env.UPDATE_JSON);
+            const update = Array.isArray(updates) ? updates[0] : updates;
+            const projectId = '63c9861e-7338-4ff5-863b-28bbc3607e17';
+            const branch = `pr-${{ github.event.pull_request.number }}`;
+            const qrUrl = `https://qr.expo.dev/eas-update?updateId=${update.id}&appScheme=expo&host=u.expo.dev`;
+            const expUrl = `exp+expo-todo-app://expo-development-client/?url=https%3A%2F%2Fu.expo.dev%2F${projectId}%3Fchannel-name%3D${branch}`;
+
+            const body = [
+              `## 📱 EAS プレビュー`,
+              ``,
+              `**exp:// リンク（タップしてExpo Goで開く）**`,
+              `\`${expUrl}\``,
+              ``,
+              `**QR コード**`,
+              `![QR Code](${qrUrl})`,
+              ``,
+              `> Update ID: \`${update.id}\` / Branch: \`${branch}\``,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body.startsWith('## 📱 EAS プレビュー'));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
