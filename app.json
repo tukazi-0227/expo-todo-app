@@ -25,6 +25,18 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "owner": "tsuka-chan",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/63c9861e-7338-4ff5-863b-28bbc3607e17"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "63c9861e-7338-4ff5-863b-28bbc3607e17"
+      }
     }
   }
 }
