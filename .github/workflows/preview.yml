@@ -28,8 +28,9 @@ jobs:
       - run: npm ci
 
       - uses: expo/expo-github-action/preview@v8
+        id: preview
         with:
-          command: eas update --branch pr-${{ github.event.pull_request.number }} --message "PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+          command: eas update --branch pr-${{ github.event.pull_request.number }} --message "PR #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}" --non-interactive
           comment: true
           comment-id: expo-preview-${{ github.event.pull_request.number }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
