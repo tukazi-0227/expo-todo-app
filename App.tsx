@@ -76,16 +76,18 @@ function TodoItem({
   onDelete: (id: string) => void;
 }) {
   return (
-    <View className="flex-row items-center bg-white rounded-2xl px-4 py-3.5 mb-3 shadow-sm border border-gray-50">
-      <Pressable
-        onPress={() => onToggle(item.id)}
-        className="w-6 h-6 rounded-full border-2 items-center justify-center mr-3 flex-shrink-0"
+    <Pressable
+      onPress={() => onToggle(item.id)}
+      className="flex-row items-center bg-white rounded-2xl px-4 py-4 mb-3 shadow-sm border border-gray-50 active:opacity-80"
+    >
+      <View
+        className="w-8 h-8 rounded-full border-2 items-center justify-center mr-3 flex-shrink-0"
         style={{ borderColor: item.completed ? "#22c55e" : "#d1d5db" }}
       >
         {item.completed && (
-          <View className="w-3 h-3 rounded-full bg-green-500" />
+          <View className="w-4 h-4 rounded-full bg-green-500" />
         )}
-      </Pressable>
+      </View>
 
       <Text
         className="flex-1 text-base leading-snug"
@@ -99,12 +101,12 @@ function TodoItem({
 
       <Pressable
         onPress={() => onDelete(item.id)}
-        className="ml-2 w-7 h-7 rounded-full bg-gray-50 items-center justify-center"
+        className="ml-2 w-8 h-8 rounded-full bg-gray-50 items-center justify-center"
         hitSlop={8}
       >
-        <Text className="text-gray-400 text-xs font-bold">✕</Text>
+        <Text className="text-gray-400 text-sm font-bold">✕</Text>
       </Pressable>
-    </View>
+    </Pressable>
   );
 }
 
@@ -151,6 +153,10 @@ export default function App() {
     setTodos((prev) => prev.filter((t) => t.id !== id));
   }
 
+  function deleteCompleted() {
+    setTodos((prev) => prev.filter((t) => !t.completed));
+  }
+
   const completedCount = todos.filter((t) => t.completed).length;
 
   return (
@@ -178,6 +184,18 @@ export default function App() {
 
         {/* Progress Bar */}
         <ProgressBar completed={completedCount} total={todos.length} />
+
+        {/* Bulk delete */}
+        {completedCount > 0 && (
+          <Pressable
+            onPress={deleteCompleted}
+            className="self-end mb-3 px-3 py-1.5 rounded-full bg-red-50 active:opacity-70"
+          >
+            <Text className="text-xs font-medium text-red-400">
+              完了済みを削除（{completedCount}件）
+            </Text>
+          </Pressable>
+        )}
 
         {/* Task List */}
         <FlatList
