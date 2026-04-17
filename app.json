@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "expo-todo-app",
-    "slug": "expo-todo-app",
+    "name": "Todo List",
+    "slug": "todo-list",
     "owner": "tsuka-chan",
     "version": "1.0.0",
     "orientation": "portrait",
